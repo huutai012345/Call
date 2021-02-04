@@ -1,0 +1,175 @@
+#video-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+video {
+  height: 300px;
+  width: 400px;
+  object-fit: cover;
+  padding: 8px;
+}
+
+.fullscreen {
+  width: 100%;
+  height: 100%;
+}
+
+.un {
+  color: #cc3b33;
+}
+
+.main {
+  height: 100vh;
+  display: flex;
+}
+
+.main__left {
+  flex: 0.8;
+  display: flex;
+  flex-direction: column;
+}
+
+.main__videos {
+  flex-grow: 1;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.main__controls {
+  background-color: #1c1e20;
+}
+
+.main__controls {
+  color: #d2d2d2;
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+}
+
+.main__controls__block {
+  display: flex;
+}
+
+.main__controls__button {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 10px;
+  min-width: 80px;
+  cursor: pointer;
+}
+
+.main__controls__button:hover {
+  background-color: #343434;
+  border-radius: 5px;
+}
+
+.main__controls__button i {
+  font-size: 24px;
+}
+
+.main .right {
+  flex: 0.2;
+  background-color: #242324;
+  border-left: 1px solid #3d3d42;
+  display: flex;
+  flex-direction: column;
+}
+
+.main .right .header {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  background-color: #f1f1f1;
+}
+
+.main .right .header h6 {
+  display: block;
+  width: 33.33%;
+  cursor: pointer;
+  padding: 10px 11px;
+  margin: 0px;
+}
+
+.main .right .header h6:hover {
+  color: red;
+}
+
+.main .right .header .tab-item.active {
+  background-color: #ddd;
+}
+
+.main .right .tab-pane {
+  flex-direction: column;
+  flex-grow: 1;
+  display: none;
+}
+
+.main .right .tab-pane.active {
+  display: flex;
+}
+
+.main .right .tab-pane .main-window {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+/* Chat */
+
+.main .right .chat .main-window .messages {
+  margin-top: 10px;
+  color: white;
+  list-style: none;
+  padding-left: 10px;
+}
+
+.main .right .chat .message-container {
+  padding: 22px 12px;
+  display: flex;
+}
+
+.main .right .chat .message-container input {
+  flex-grow: 1;
+  background-color: transparent;
+  border: none;
+  color: #f5f5f5;
+}
+
+/* User */
+
+.main .right .user ul li {
+  margin-top: 10px;
+  color: white;
+  list-style: none;
+  padding-left: 10px;
+}
+
+/* Participant */
+.main .right .participant ul {
+  margin-top: 10px;
+}
+
+.main .right .participant ul li {
+  color: white;
+  list-style: none;
+  display: flex;
+  margin-left: -30px;
+  cursor: pointer;
+  border: 1px solid white;
+}
+
+.main .right .participant ul li video {
+  width: 100px;
+  height: 100px;
+}
+
+.main .right .participant ul li p {
+  margin-left: 10px;
+  line-height: 100px;
+  margin-bottom: 0px;
+}
