@@ -1,60 +1,63 @@
-#video-grid {
+.main {
+  height: 100vh;
+  display: flex;
+}
+
+.main .left {
+  flex: 0.8;
+  display: flex;
+  flex-direction: column;
+}
+
+.main .left .main-videos {
+  display: flex;
+  height: 90%;
+  background-color: black;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.main .left .main-videos #video-grid {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
 }
-video {
+
+.main .left .main-videos #video-grid .normal {
   height: 300px;
   width: 400px;
   object-fit: cover;
   padding: 8px;
 }
 
-.fullscreen {
+.main .left .main-videos #video-focus {
+  display: none;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.main .left .main-videos #video-focus .fullscreen {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  padding: 8px;
 }
 
-.un {
-  color: #cc3b33;
-}
-
-.main {
-  height: 100vh;
-  display: flex;
-}
-
-.main__left {
-  flex: 0.8;
-  display: flex;
-  flex-direction: column;
-}
-
-.main__videos {
-  flex-grow: 1;
-  background-color: black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
-}
-
-.main__controls {
+.main .left .controls {
+  height: 10%;
   background-color: #1c1e20;
-}
-
-.main__controls {
   color: #d2d2d2;
   display: flex;
   justify-content: space-between;
   padding: 5px;
 }
 
-.main__controls__block {
+.main .left .controls .main-control {
   display: flex;
 }
 
-.main__controls__button {
+.main .left .controls .main-control .control-button {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -64,12 +67,12 @@ video {
   cursor: pointer;
 }
 
-.main__controls__button:hover {
+.main .left .controls .main-control .control-button:hover {
   background-color: #343434;
   border-radius: 5px;
 }
 
-.main__controls__button i {
+.main .left .main-control .control-button i {
   font-size: 24px;
 }
 
@@ -108,6 +111,7 @@ video {
   flex-direction: column;
   flex-grow: 1;
   display: none;
+  max-height: 95%;
 }
 
 .main .right .tab-pane.active {
@@ -116,7 +120,7 @@ video {
 
 .main .right .tab-pane .main-window {
   flex-grow: 1;
-  overflow-y: auto;
+  overflow-y: scroll;
 }
 
 /* Chat */
@@ -142,34 +146,57 @@ video {
 
 /* User */
 
+.main .right .user ul {
+  margin-top: 10px;
+  color: white;
+  list-style: none;
+  padding: 0px;
+}
+
 .main .right .user ul li {
   margin-top: 10px;
   color: white;
   list-style: none;
-  padding-left: 10px;
+  margin-left: 20px;
+  font-size: 20px;
 }
 
 /* Participant */
 .main .right .participant ul {
   margin-top: 10px;
+  padding: 0px 10px;
 }
 
 .main .right .participant ul li {
   color: white;
   list-style: none;
   display: flex;
-  margin-left: -30px;
   cursor: pointer;
   border: 1px solid white;
+  border-radius: 10px;
+  margin-bottom: 5px;
+  padding: 10px;
+}
+
+.main .right .participant ul li:hover {
+  border: 1px solid red;
 }
 
 .main .right .participant ul li video {
-  width: 100px;
-  height: 100px;
+  margin-left: 10px;
+  width: 20%;
 }
 
 .main .right .participant ul li p {
   margin-left: 10px;
-  line-height: 100px;
+  line-height: 50px;
   margin-bottom: 0px;
+}
+
+.main .right .participant ul li img {
+  color: black;
+}
+
+.un {
+  color: #cc3b33;
 }

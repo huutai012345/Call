@@ -1,9 +1,11 @@
 const videoGird = $("#video-grid");
+const videoFocus = $("#video-focus");
 const peer = new Peer();
 const socket = io();
 let myVideoStream;
 let currentPeer;
 const users = {};
+let focusUser = null;
 
 navigator.mediaDevices
   .getUserMedia({
@@ -13,25 +15,38 @@ navigator.mediaDevices
   .then((stream) => {
     myVideoStream = stream;
 
-    addVideoParticipant(stream);
+    const myVideo = document.createElement("video");
+    myVideo.muted = true;
+    addVideoParticipant(myVideo, stream);
+
     users["You"] = { stream: myVideoStream };
     loadParticipant();
 
     //answer
     peer.on("call", (call) => {
       call.answer(stream);
-      addVideoParticipant(stream);
+      const video = document.createElement("video");
+
       call.on("stream", (userVideoStream) => {
+        users[call.peer] = { stream: userVideoStream };
         currentPeer = call.peerConnection;
+        video.setAttribute("id", "participant" + call.peer);
+
+        addVideoParticipant(video, userVideoStream);
+        loadParticipant();
       });
-      users[call.peer] = { call, stream };
-      loadParticipant();
+
+      call.on("close", () => {
+        console.log("answer");
+
+        video.remove();
+        call.close();
+      });
     });
 
     //call
     socket.on("connected", (userId) => {
       callPeer(userId, stream);
-      addVideoParticipant(stream);
       loadParticipant();
     });
 
@@ -43,18 +58,20 @@ navigator.mediaDevices
           `<li class="message"><b>You: </b>${text.val()}</li>`
         );
         text.val("");
+        scrollToBottom();
       }
     });
 
-    $(".main__leave_button").click(function (e) {
+    $(".leave-button").click(function (e) {
       socket.emit("disconnected");
-      $(".participants").empty();
     });
 
     socket.on("create-message", (message, userId) => {
       $(".messages").append(
         `<li class="message"><b>${userId}: </b>${message}</li>`
       );
+
+      scrollToBottom();
     });
 
     socket.on("shared-screen", (userId) => {
@@ -62,19 +79,26 @@ navigator.mediaDevices
         `<li class="message"><b>${userId}: </b>started screen sharing</li>`
       );
 
-      // const video = document.createElement("video");
-      // video.classList.add("fullscreen");
-      //video.srcObject = users[userId].stream;
-      // addVideoParticipant(video, users[userId].stream);
+      $(`#${userId}`).append(`<i class="fas fa-thumbtack"></i>`);
+      focusUser = userId;
+
+      const video = document.createElement("video");
+      addVideoFocus(video, users[userId].stream);
 
       loadParticipant();
       setUnShareScreen();
     });
 
-    socket.on("share-screen", (userId) => {
+    socket.on("stopped-share-screen", (userId) => {
       $(".messages").append(
         `<li class="message"><b>${userId}: </b>stopped screen sharing</li>`
       );
+
+      if (focusUser === userId) {
+        $(`#${userId}`).find("i").remove();
+        videoFocus.css({ display: "none" });
+        videoGird.css({ display: "flex" });
+      }
 
       setShareScreen();
     });
@@ -85,8 +109,8 @@ navigator.mediaDevices
       );
 
       if (users[userId]) {
-        users[userId].call.close();
-        $(users[userId].video).css({ display: "none" }).remove();
+        $(`#participant${userId}`).css({ display: "none" });
+        $(`#participant${userId}`).remove();
         delete users[userId];
         loadParticipant();
       }
@@ -108,69 +132,106 @@ peer.on("open", (id) => {
     `<li class="message"><b>You: </b>have joined room</li>`
   );
 
-  setUserId(id);
+  $(".users").append(`<li class="message"><b>ID: </b>${id}</li>`);
   socket.emit("join-room", roomId, id);
 });
 
-const createVideo = (stream) => {
-  const video = document.createElement("video");
+const addVideoParticipant = (video, stream) => {
+  video.classList.add("normal");
   video.srcObject = stream;
   video.play();
-  return video;
-};
 
-const addVideoParticipant = (stream) => {
-  const video = createVideo(stream);
   videoGird.append(video);
-
-  console.log(stream);
 };
 
-const addVideoMain = (stream) => {
-  videoGird.empty();
-  const video = createVideo(stream);
+const addVideoFocus = (video, stream) => {
+  videoGird.css({ display: "none" });
+
   video.classList.add("fullscreen");
-  videoGird.append(video);
+  video.srcObject = stream;
+  video.play();
+
+  videoFocus.css({ display: "flex" });
+  videoFocus.empty();
+  videoFocus.append(video);
 };
 
 const callPeer = (userId, stream) => {
   const call = peer.call(userId, stream);
-  call.on("stream", (remoteStream) => {
+  const video = document.createElement("video");
+
+  call.on("stream", (userVideoStream) => {
     currentPeer = call.peerConnection;
+    users[userId] = { stream: userVideoStream };
+
+    video.setAttribute("id", "participant" + userId);
+    addVideoParticipant(video, userVideoStream);
+    loadParticipant();
   });
 
-  users[userId] = { call, stream };
+  call.on("close", () => {
+    video.remove();
+    call.close();
+  });
 };
 
 const loadParticipant = () => {
   $(".participants").empty();
 
-  console.log("participants");
   Object.keys(users).forEach((key) => {
     $(".participants").append(`<li id="${key}"></li>`);
 
     const stream = users[key].stream;
-    const video = createVideo(stream);
+
+    const video = document.createElement("video");
+    video.srcObject = stream;
+    video.play();
+
     if (key === "You") {
       video.muted = true;
     }
-    video.muted = true;
-    console.log(stream);
+
     $(`#${key}`).append(video);
     $(`#${key}`).append(`<p>${key}</p>`);
+    if (key === focusUser) {
+      $(`#${key}`).append(`<i class="fas fa-thumbtack"></i>`);
+    }
 
     $(`#${key}`).click(function (e) {
-      addVideoMain(stream);
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      video.play();
+
+      if (focusUser) {
+        if (focusUser === key) {
+          focusUser = null;
+
+          $(`#${key}`).find("i").remove();
+          videoFocus.css({ display: "none" });
+          videoGird.css({ display: "flex" });
+        } else {
+          $(`#${focusUser}`).find("i").remove();
+
+          focusUser = key;
+
+          $(`#${key}`).append(`<i class="fas fa-thumbtack"></i>`);
+          addVideoFocus(video, stream);
+        }
+      } else {
+        focusUser = key;
+
+        $(`#${key}`).append(`<i class="fas fa-thumbtack"></i>`);
+        addVideoFocus(video, stream);
+      }
     });
   });
 };
 
 const startShareScreen = () => {
-  $(".messages").append(
-    `<li class="message"><b>You: </b>have screen sharing</li>`
-  );
-
-  setUnShareScreen();
+  if (Object.keys(users).length === 1) {
+    alert("Room chỉ có mình bạn ???");
+    return;
+  }
 
   navigator.mediaDevices
     .getDisplayMedia({
@@ -183,6 +244,11 @@ const startShareScreen = () => {
       },
     })
     .then((stream) => {
+      $(".messages").append(
+        `<li class="message"><b>You: </b>have screen sharing</li>`
+      );
+      setUnShareScreen();
+
       let videoTrack = stream.getVideoTracks()[0];
       videoTrack.onended = () => {
         stopShareScreen();
@@ -202,7 +268,7 @@ const startShareScreen = () => {
 
 const stopShareScreen = () => {
   $(".messages").append(
-    `<li class="message"><b>You: </b>have stopped screen sharing</li>`
+    `<li class="message"><b>You: </b>stopped screen sharing</li>`
   );
 
   let videoTrack = myVideoStream.getVideoTracks()[0];
@@ -236,20 +302,12 @@ const playStop = () => {
   }
 };
 
-const setUserId = (userId) => {
-  const html = `
-    <i class="fas fa-user"></i>
-    <span>${userId}</span>
-  `;
-  document.querySelector(".main__user_button").innerHTML = html;
-};
-
 const setMuteButton = () => {
   const html = `
     <i class="fas fa-microphone"></i>
     <span>Mute</span>
   `;
-  document.querySelector(".main__mute_button").innerHTML = html;
+  document.querySelector(".mute-button").innerHTML = html;
 };
 
 const setUnmuteButton = () => {
@@ -257,7 +315,7 @@ const setUnmuteButton = () => {
     <i class="un fas fa-microphone-slash"></i>
     <span>Mute</span>
   `;
-  document.querySelector(".main__mute_button").innerHTML = html;
+  document.querySelector(".mute-button").innerHTML = html;
 };
 
 const setStopVideo = () => {
@@ -265,7 +323,7 @@ const setStopVideo = () => {
     <i class="fas fa-video"></i>
     <span>Video</span>
   `;
-  document.querySelector(".main__video_button").innerHTML = html;
+  document.querySelector(".video-button").innerHTML = html;
 };
 
 const setPlayVideo = () => {
@@ -273,31 +331,21 @@ const setPlayVideo = () => {
     <i class="un fas fa-video-slash"></i>
     <span>Video</span>
   `;
-  document.querySelector(".main__video_button").innerHTML = html;
-};
-
-const setShowChat = () => {
-  const html = `
-    <i class="fas fa-comment"></i>
-    <span>Chat</span>
-  `;
-  document.querySelector(".main__showChat_button").innerHTML = html;
-};
-
-const setUnShowChat = () => {
-  const html = `
-    <i class="un fas fa-comment-slash"></i>
-    <span>Chat</span>
-  `;
-  document.querySelector(".main__showChat_button").innerHTML = html;
+  document.querySelector(".video-button").innerHTML = html;
 };
 
 const setShareScreen = () => {
-  $(".main__share_button").css("display", "flex");
+  $(".share-button").css("display", "flex");
 };
 
 const setUnShareScreen = () => {
-  $(".main__share_button").css("display", "none");
+  $(".share-button").css("display", "none");
+};
+
+const scrollToBottom = () => {
+  let d = $(".main-window");
+  console.log(d.prop("scrollHeight"));
+  d.scrollTop(d.prop("scrollHeight"));
 };
 
 $(".tab-item").each((index, obj) => {
@@ -311,14 +359,14 @@ $(".tab-item").each((index, obj) => {
   });
 });
 
-// window.addEventListener("beforeunload", function (e) {
-//   const confirmationMessage = "o/";
+window.addEventListener("beforeunload", function (e) {
+  const confirmationMessage = "o/";
 
-//   socket.emit("disconnected");
-//   peer.disconnect();
-//   peer.destroy();
-//   socket.close();
+  socket.emit("disconnected");
+  peer.disconnect();
+  peer.destroy();
+  socket.close();
 
-//   (e || window.event).returnValue = confirmationMessage; //Gecko + IE
-//   return confirmationMessage; //Webkit, Safari, Chrome
-// });
+  (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+  return confirmationMessage; //Webkit, Safari, Chrome
+});

@@ -15,40 +15,31 @@
   </head>
   <body>
     <div class="main">
-      <div class="main__left">
-        <div class="main__videos">
+      <div class="left">
+        <div class="main-videos">
           <div id="video-grid"></div>
+          <div id="video-focus"></div>
         </div>
-        <div class="main__controls">
-          <div class="main__controls__block">
-            <div
-              onclick="muteUnmute()"
-              class="main__controls__button main__mute_button"
-            >
+        <div class="controls">
+          <div class="main-control">
+            <div onclick="muteUnmute()" class="control-button mute-button">
               <i class="fas fa-microphone"></i>
               <span>Mute</span>
             </div>
-            <div
-              onclick="playStop()"
-              class="main__controls__button main__video_button"
-            >
+            <div onclick="playStop()" class="control-button video-button">
               <i class="fas fa-video"></i>
               <span>Video</span>
             </div>
             <div
               onclick="startShareScreen()"
-              class="main__controls__button main__share_button"
+              class="control-button share-button"
             >
               <i class="fas fa-clone"></i>
               <span>Screen Sharing</span>
             </div>
           </div>
-          <div class="main__controls__block">
-            <div class="main__controls__button main__user_button">
-              <i class="fas fa-user"></i>
-              <span>ID User</span>
-            </div>
-            <div class="main__controls__button main__leave_button">
+          <div class="main-control">
+            <div class="control-button leave-button">
               <i class="fas fa-sign-out-alt"></i>
               <span>Leave</span>
             </div>
@@ -57,9 +48,13 @@
       </div>
       <div class="right">
         <div class="header">
-          <h6 id="tab1" class="tab-item active">Chat</h6>
-          <h6 id="tab2" class="tab-item">User</h6>
-          <h6 id="tab3" class="tab-item">Participant</h6>
+          <h6 id="tab1" class="tab-item active">
+            <i class="fas fa-comments"></i>
+          </h6>
+          <h6 id="tab2" class="tab-item"><i class="fas fa-user"></i></h6>
+          <h6 id="tab3" class="tab-item">
+            <i class="fas fa-user-friends"></i>
+          </h6>
         </div>
         <div id="tab1c" class="tab-pane chat active">
           <div class="main-window">
@@ -75,9 +70,7 @@
         </div>
         <div id="tab2c" class="tab-pane user">
           <div class="main-window">
-            <ul class="users">
-              <li>You</li>
-            </ul>
+            <ul class="users"></ul>
           </div>
         </div>
         <div id="tab3c" class="tab-pane participant">

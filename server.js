@@ -36,7 +36,7 @@ io.on("connection", (socket) => {
     });
 
     socket.on("stop-share-screen", () => {
-      socket.to(roomId).broadcast.emit("share-screen", userId);
+      socket.to(roomId).broadcast.emit("stopped-share-screen", userId);
     });
 
     socket.on("disconnected", () => {
